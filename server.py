@@ -16,9 +16,10 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 KAFKA_HOSTNAME = os.getenv("KAFKA_HOSTNAME")
 KAFKA_PORT = os.getenv("KAFKA_HOSTNAME")
 
+# Redis initialize
 r = redis.StrictRedis(host=REDIS_HOSTNAME, port=REDIS_PORT,
                       password=REDIS_PASSWORD, ssl=True)
-
+# Kafka initialize
 producer = KafkaProducer(bootstrap_servers=[f'{KAFKA_HOSTNAME}:{KAFKA_PORT}'],
                         value_serializer=lambda x: json.dumps(x).encode('utf-8'))
 
