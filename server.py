@@ -29,7 +29,7 @@ pipeline = keras_ocr.pipeline.Pipeline(scale=3)
 
 
 @app.post("/kerasocr/")
-def create_upload_file(file: UploadFile = File(...)):
+def create_upload_file(file: UploadFile = File(...), image_id):
     
     # Redis Stuff
     r.set("Keras_Container", "BUSY")
@@ -37,7 +37,9 @@ def create_upload_file(file: UploadFile = File(...)):
     fileName = file.filename
     predictions = recognize(file.file)
 
-    response = {}
+    response = {
+        'image_id': image_id
+    }
     text = []
     coords = []
     for idx, prediction in enumerate(predictions):
@@ -64,14 +66,14 @@ def recognize(img):
 @app.post("/tesserocr/")
 async def upload_file(file: UploadFile = File(...)):
 
-    # Redis Stuff
-    r.set("Keras_Container", "BUSY")
+    # # Redis Stuff NOT NEEEDED AS CPU
+    # r.set("Keras_Container", "BUSY")
 
     image = Image.open(file.file)
     res = tesserocr.image_to_text(image)
 
     # Redis Kafka Stuff
-    r.set("Keras_Container", "FREE")
+    # r.set("Keras_Container", "FREE")
     producer.send('CONTAINER_TOPIC', value=res)
 
     return res
