@@ -3,6 +3,8 @@ import os
 import keras_ocr
 import tesserocr
 from PIL import Image
+
+# imports for env kafka and redis
 from dotenv import load_dotenv
 from kafka import  KafkaProducer
 import redis
