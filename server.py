@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from kafka import  KafkaProducer
 import redis
 import json
+import os
 
 load_dotenv()
 
