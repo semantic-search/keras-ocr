@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
   tesseract-ocr\
   libtesseract-dev\ 
   libleptonica-dev\ 
-  pkg-config
+  pkg-config\
+  libgl1-mesa-glx
 
 COPY ./requirements.txt /app/requirements.txt
 
