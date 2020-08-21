@@ -1,5 +1,6 @@
 import tesserocr
 from PIL import Image
+from pathlib import Path
 
 # imports for env kafka
 from dotenv import load_dotenv
@@ -42,21 +43,30 @@ for message in consumer_tesserocr:
     print(f"kafka - - : {KAFKA_HOSTNAME}:{KAFKA_PORT}")
 
     
+    folder_path = "image/"
     message = message.value
     image_id = message['image_id']
     data = message['data']
 
-    data = base64.b64decode(data.encode("ascii"))
+    # set image path and check if folder exist
+    image_path = folder_path+image_id
+    Path(folder_path).mkdir(parents=True, exist_ok=True)
 
-    image = Image.open(data)
+    with open(image_path, "wb") as fh:
+        fh.write(base64.b64decode(data.encode("ascii")))
+
+    image = Image.open(image_path)
     res = tesserocr.image_to_text(image)
+
+    # delete the image after use
+    os.remove(image_path)
 
     response = {
         'image_id': image_id,
         'data': res
     }
 
-    print(res)
+    print(response)
 
     # sending full and text res(without cordinates or probability) to kafka
     producer.send(SEND_TOPIC_FULL, value=response)

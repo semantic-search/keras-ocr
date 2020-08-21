@@ -1,10 +1,11 @@
 import keras_ocr
-from PIL import Image  
+from PIL import Image
+from pathlib import Path
 
 
 # imports for env kafka
 from dotenv import load_dotenv
-from kafka import  KafkaProducer
+from kafka import KafkaProducer
 from kafka import KafkaConsumer
 from json import loads
 import base64
@@ -32,11 +33,12 @@ consumer_kerasocr = KafkaConsumer(
     value_deserializer=lambda x: loads(x.decode("utf-8")),
 )
 
-# For Sending processed img data further 
+# For Sending processed img data further
 producer = KafkaProducer(
     bootstrap_servers=[f"{KAFKA_HOSTNAME}:{KAFKA_PORT}"],
     value_serializer=lambda x: json.dumps(x).encode("utf-8"),
 )
+
 
 def recognize(img):
     pipeline = keras_ocr.pipeline.Pipeline(scale=3)
@@ -45,18 +47,28 @@ def recognize(img):
     predictions = pipeline.recognize(images)
     return predictions
 
+
 for message in consumer_kerasocr:
     print('xxx--- inside consumer_kerasocr---xxx')
     print(f"kafka - - : {KAFKA_HOSTNAME}:{KAFKA_PORT}")
 
-    
+    folder_path = "image/"
     message = message.value
     image_id = message['image_id']
     data = message['data']
 
-    data = base64.b64decode(data.encode("ascii"))
-    image = Image.open(data)
+    # set image path and check if folder exist
+    image_path = folder_path+image_id
+    Path(folder_path).mkdir(parents=True, exist_ok=True)
+
+    with open(image_path, "wb") as fh:
+        fh.write(base64.b64decode(data.encode("ascii")))
+
+    image = Image.open(image_path)
     predictions = recognize(image)
+
+    # delete the image after use
+    os.remove(image_path)
 
     full_res = {
         'image_id': image_id
@@ -80,5 +92,3 @@ for message in consumer_kerasocr:
     producer.send(SEND_TOPIC_TEXT, value=text_res)
 
     producer.flush()
-
-
