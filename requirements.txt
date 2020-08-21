@@ -2,3 +2,4 @@ keras-ocr
 tesserocr
 python-dotenv
 kafka-python
+redis

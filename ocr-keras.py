@@ -11,17 +11,26 @@ from json import loads
 import base64
 import json
 import os
+import redis
+
 
 load_dotenv()
 
 KAFKA_HOSTNAME = os.getenv("KAFKA_HOSTNAME")
 KAFKA_PORT = os.getenv("KAFKA_PORT")
+REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME")
+REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
 RECEIVE_TOPIC = 'KERAS_OCR'
 SEND_TOPIC_FULL = "IMAGE_RESULTS"
 SEND_TOPIC_TEXT = "TEXT"
 
 print(f"kafka : {KAFKA_HOSTNAME}:{KAFKA_PORT}")
+
+# Redis initialize
+r = redis.StrictRedis(host=REDIS_HOSTNAME, port=REDIS_PORT,
+                      password=REDIS_PASSWORD, ssl=True)
 
 # To receive img data to process
 consumer_kerasocr = KafkaConsumer(
@@ -57,6 +66,9 @@ for message in consumer_kerasocr:
     image_id = message['image_id']
     data = message['data']
 
+    # Setting image-id to topic name(container name), so we can know which image it's currently processing
+    r.set(RECEIVE_TOPIC, image_id)
+    
     # set image path and check if folder exist
     image_path = folder_path+image_id
     Path(folder_path).mkdir(parents=True, exist_ok=True)
