@@ -1,4 +1,6 @@
 import keras_ocr
+from PIL import Image  
+
 
 # imports for env kafka
 from dotenv import load_dotenv
@@ -53,8 +55,8 @@ for message in consumer_kerasocr:
     data = message['data']
 
     data = base64.b64decode(data.encode("ascii"))
-
-    predictions = recognize(data)
+    image = Image.open(data)
+    predictions = recognize(image)
 
     full_res = {
         'image_id': image_id
