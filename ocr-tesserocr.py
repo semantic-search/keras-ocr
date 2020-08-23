@@ -1,3 +1,5 @@
+from Util.Azure import getData
+
 import tesserocr
 from PIL import Image
 from pathlib import Path
@@ -21,6 +23,8 @@ KAFKA_PORT = os.getenv("KAFKA_PORT")
 REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME")
 REDIS_PORT = os.getenv("REDIS_PORT")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
+ConnectionString = os.getenv("ConnectionString")
+
 
 RECEIVE_TOPIC = 'TESSER_OCR'
 SEND_TOPIC_FULL = "IMAGE_RESULTS"
@@ -55,18 +59,20 @@ for message in consumer_tesserocr:
     
     folder_path = "image/"
     message = message.value
-    image_id = message['image_id']
-    data = message['data']
 
+    container_name = message['container_name']
+    blob_name = message['blob_name']
+
+    blob_data = getData(ConnectionString, container_name, blob_name)
     # Setting image-id to topic name(container name), so we can know which image it's currently processing
-    r.set(RECEIVE_TOPIC, image_id)
+    r.set(RECEIVE_TOPIC, blob_name)
 
     # set image path and check if folder exist
-    image_path = folder_path+image_id
+    image_path = folder_path+blob_name
     Path(folder_path).mkdir(parents=True, exist_ok=True)
 
     with open(image_path, "wb") as fh:
-        fh.write(base64.b64decode(data.encode("ascii")))
+        fh.write(blob_data)
 
     image = Image.open(image_path)
     res = tesserocr.image_to_text(image)
@@ -75,7 +81,7 @@ for message in consumer_tesserocr:
     os.remove(image_path)
 
     response = {
-        'image_id': image_id,
+        'blob_name': blob_name,
         'data': res
     }
 

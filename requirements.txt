@@ -1,5 +1,8 @@
 keras-ocr
 tesserocr
+
+#deps needed
 python-dotenv
 kafka-python
 redis
+azure-storage-blob
