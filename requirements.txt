@@ -5,4 +5,3 @@ tesserocr
 python-dotenv
 kafka-python
 redis
-azure-storage-blob
