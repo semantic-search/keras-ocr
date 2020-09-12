@@ -15,7 +15,7 @@ def recognize_keras(img):
 def predict(file_name, doc=False):
 
     predictions = recognize_keras(file_name)
-    tesser_res = tesserocr.image_to_text(file_name)
+    tesser_res = tesserocr.file_to_text(file_name)
 
     text = []
     coords = []
