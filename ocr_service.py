@@ -12,31 +12,19 @@ def recognize_keras(img):
 
     return predictions
 
-def predict(file_name, doc=False):
+def predict(file_name):
 
     predictions = recognize_keras(file_name)
     tesser_res = tesserocr.file_to_text(file_name)
 
-    text = []
-    coords = []
+    keras_text = []
+    # coords = []
     for idx, prediction in enumerate(predictions):
         for word, array in prediction:
-            text.append(word)
-            coords.append(array.tolist())
-    if doc:
-        response = {
-            "keras_ocr" : text, 
-            "tesser_ocr" : tesser_res
-        }
-    else:
-        response = {
-            "file_name": file_name,
-            "is_doc_type": False,
-            "text": {
-                    "keras_ocr" : text,
-                    "tesser_ocr" : tesser_res
-                    }
-        }
+            keras_text.append(word)
+            # coords.append(array.tolist())
+    
+    response = ' '.join(keras_text) + ' ' + tesser_res 
 
     os.remove(file_name)
 
