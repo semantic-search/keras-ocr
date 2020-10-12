@@ -24,7 +24,7 @@ def predict(file_name):
             keras_text.append(word)
             # coords.append(array.tolist())
     
-    response = ' '.join(keras_text) + ' ' + tesser_res 
+    response = ' '.join(keras_text) + ' ' + ' '.join(tesser_res.split()) 
 
     os.remove(file_name)
 
