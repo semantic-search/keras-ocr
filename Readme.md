@@ -4,7 +4,7 @@
 ## RUN IMAGE FROM GHCR 
 
 ```sh
-docker run -it --env-file .env ghcr.io/semantic-search/keras_tesser_ocr:latest
+docker run --gpus all -it --env-file .env ghcr.io/semantic-search/keras_tesser_ocr
 ```
 
 - Make sure you have `.env` file with following parameters
