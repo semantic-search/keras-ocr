@@ -3,9 +3,9 @@ import keras_ocr
 import tesserocr
 from PIL import Image
 
+pipeline = keras_ocr.pipeline.Pipeline(scale=3)
 
 def recognize_keras(img):
-    pipeline = keras_ocr.pipeline.Pipeline(scale=3)
     # actually here's only 1 image in this list
     images = [keras_ocr.tools.read(img)]
     predictions = pipeline.recognize(images)
