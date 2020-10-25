@@ -10,15 +10,18 @@ import requests
 
 global_init()
 
-def save_to_db(db_object, result_to_save):
-    print("*****************SAVING TO DB******************************")
-    if db_object.text:
-        db_object.text = db_object.text + ' ' + result_to_save
-    else:
-        db_object.text = result_to_save
-    db_object.save()
-    print("*****************SAVED TO DB******************************")
 
+def save_to_db(db_object, result_to_save):
+    try:
+        print("*****************SAVING TO DB******************************")
+        if db_object.text:
+            db_object.text = db_object.text + ' ' + result_to_save
+        else:
+            db_object.text = result_to_save
+        db_object.save()
+        print("*****************SAVED TO DB******************************")
+    except Exception as e:
+        print(f"{e} ERROR IN SAVE TO DB")
 
 def update_state(file):
     payload = {
@@ -30,13 +33,6 @@ def update_state(file):
         requests.request("POST", globals.DASHBOARD_URL,  data=payload)
     except: 
         print("EXCEPTION IN UPDATE STATE API CALL......")
-
-
-def convert(o):
-    if isinstance(o, numpy.int64):
-        return int(o)
-    raise TypeError
-
 
 if __name__ == "__main__":
     print("Connected to Kafka at " + globals.KAFKA_HOSTNAME + ":" + globals.KAFKA_PORT)
