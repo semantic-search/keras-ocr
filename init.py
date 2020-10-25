@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(
     format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%Y-%m-%d:%H:%M:%S',
-    level=logging.DEBUG
+    level=logging.ERROR
     )
 from logstash_async.handler import AsynchronousLogstashHandler
 
@@ -44,5 +44,5 @@ async_handler = AsynchronousLogstashHandler(globals.LOGSTASH_HOSTNAME,int(global
 error_logger.addHandler(async_handler)
 
 def ERR_LOGGER(msg):
-    msg = globals.RECEIVE_TOPIC + msg
+    msg = globals.RECEIVE_TOPIC +" "+ msg
     error_logger.error(msg)
