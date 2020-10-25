@@ -1,17 +1,11 @@
-import redis
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
 import globals
 import json
 
-
-# Redis initialize
-redis_obj = redis.StrictRedis(
-    host=globals.REDIS_HOSTNAME,
-    port=globals.REDIS_PORT,
-    password=globals.REDIS_PASSWORD,
-    ssl=True
-)
+import logging
+import time
+from logstash_async.handler import AsynchronousLogstashHandler
 
 # Kafka initialize
 consumer_obj = KafkaConsumer(
@@ -35,3 +29,15 @@ producer_obj = KafkaProducer(
     sasl_plain_username=globals.KAFKA_USERNAME,
     sasl_plain_password=globals.KAFKA_PASSWORD
 )
+
+# Get you a test logger
+error_logger = logging.getLogger('python-logstash-logger')
+# Set it to whatever level you want - default will be info
+error_logger.setLevel(logging.DEBUG)
+# Create a handler for it
+async_handler = AsynchronousLogstashHandler(globals.LOGSTASH_HOSTNAME, globals.LOGSTASH_PORT, database_path=None)
+# Add the handler to the logger
+error_logger.addHandler(async_handler)
+
+def ERR_LOGGER(msg):
+    error_logger.info(msg)

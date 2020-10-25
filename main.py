@@ -1,12 +1,14 @@
-import json
 import uuid
+
+from numpy.lib.shape_base import expand_dims
 from db_models.mongo_setup import global_init
 from db_models.models.cache_model import Cache
 import init
+from init import ERR_LOGGER
 from ocr_service import predict
 import globals
-import numpy
 import requests
+
 
 global_init()
 
@@ -22,6 +24,7 @@ def save_to_db(db_object, result_to_save):
         print("*****************SAVED TO DB******************************")
     except Exception as e:
         print(f"{e} ERROR IN SAVE TO DB")
+        ERR_LOGGER(f"{e} ERROR IN SAVE TO DB")
 
 def update_state(file):
     payload = {
@@ -31,8 +34,9 @@ def update_state(file):
     }
     try:
         requests.request("POST", globals.DASHBOARD_URL,  data=payload)
-    except: 
-        print("EXCEPTION IN UPDATE STATE API CALL......")
+    except Exception as e: 
+        print(f"{e} EXCEPTION IN UPDATE STATE API CALL......")
+        ERR_LOGGER(f"{e} EXCEPTION IN UPDATE STATE API CALL......")
 
 if __name__ == "__main__":
     print("Connected to Kafka at " + globals.KAFKA_HOSTNAME + ":" + globals.KAFKA_PORT)
@@ -61,10 +65,16 @@ if __name__ == "__main__":
 
                 result_list = list()
                 for image in images_array:
-                    image_results = predict(image)
+                    try:
+                        image_results = predict(image)
+                    except Exception as e:
+                        print(f"{e} Exception in predict")
+                        ERR_LOGGER(f"{e} Exception in predict")
+                        continue
+
                     result_list.append(image_results)
                 to_save = ' '.join(result_list)
-                print("to_save audio", to_save)
+                print("to_save", to_save)
                 save_to_db(db_object, to_save)
                 print(".....................FINISHED PROCESSING FILE.....................")
                 update_state(file_name)
@@ -75,9 +85,14 @@ if __name__ == "__main__":
             """image"""
             with open(file_name, 'wb') as file_to_save:
                 file_to_save.write(db_object.file.read())
-            image_results = predict(file_name)
+            try:
+                image_results = predict(file_name)
+            except Exception as e:
+                print(f"{e} Exception in predict")
+                ERR_LOGGER(f"{e} Exception in predict")
+                continue
             to_save = image_results
-            print("to_save audio", to_save)
+            print("to_save", to_save)
             save_to_db(db_object, to_save)
             print(".....................FINISHED PROCESSING FILE.....................")
             update_state(file_name)
