@@ -1,6 +1,4 @@
 import uuid
-
-from numpy.lib.shape_base import expand_dims
 from db_models.mongo_setup import global_init
 from db_models.models.cache_model import Cache
 import init
@@ -12,6 +10,7 @@ import requests
 
 global_init()
 
+FILE_ID = ""
 
 def save_to_db(db_object, result_to_save):
     try:
@@ -23,8 +22,8 @@ def save_to_db(db_object, result_to_save):
         db_object.save()
         print("*****************SAVED TO DB******************************")
     except Exception as e:
-        print(f"{e} ERROR IN SAVE TO DB")
-        ERR_LOGGER(f"{e} ERROR IN SAVE TO DB")
+        print(f"{e} ERROR IN SAVE TO DB FILE ID {FILE_ID}")
+        ERR_LOGGER(f"{e} ERROR IN SAVE TO DB FILE ID {FILE_ID}")
 
 def update_state(file):
     payload = {
@@ -35,8 +34,8 @@ def update_state(file):
     try:
         requests.request("POST", globals.DASHBOARD_URL,  data=payload)
     except Exception as e: 
-        print(f"{e} EXCEPTION IN UPDATE STATE API CALL......")
-        ERR_LOGGER(f"{e} EXCEPTION IN UPDATE STATE API CALL......")
+        print(f"{e} EXCEPTION IN UPDATE STATE API CALL......FILE ID {FILE_ID}")
+        ERR_LOGGER(f"{e} EXCEPTION IN UPDATE STATE API CALL......FILE ID {FILE_ID}")
 
 if __name__ == "__main__":
     print("Connected to Kafka at " + globals.KAFKA_HOSTNAME + ":" + globals.KAFKA_PORT)
@@ -46,6 +45,7 @@ if __name__ == "__main__":
         message = message.value
         db_key = str(message)
         print(db_key, 'db_key')
+        FILE_ID = db_key
         db_object = Cache.objects.get(pk=db_key)
         file_name = db_object.file_name
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                         image_results = predict(image)
                     except Exception as e:
                         print(f"{e} Exception in predict")
-                        ERR_LOGGER(f"{e} Exception in predict")
+                        ERR_LOGGER(f"{e} Exception in predict FILE ID {FILE_ID}")
                         continue
 
                     result_list.append(image_results)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 image_results = predict(file_name)
             except Exception as e:
                 print(f"{e} Exception in predict")
-                ERR_LOGGER(f"{e} Exception in predict")
+                ERR_LOGGER(f"{e} Exception in predict FILE ID {FILE_ID}")
                 continue
             to_save = image_results
             print("to_save", to_save)
