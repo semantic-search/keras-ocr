@@ -25,16 +25,18 @@ def save_to_db(db_object, result_to_save):
         print(f"{e} ERROR IN SAVE TO DB FILE ID {FILE_ID}")
         ERR_LOGGER(f"{e} ERROR IN SAVE TO DB FILE ID {FILE_ID}")
 
-def update_state(file):
+def update_state(file_name):
     payload = {
-        'topic_name': globals.RECEIVE_TOPIC,
-        'client_id': globals.CLIENT_ID,
-        'value': file
+        'parent_name': globals.PARENT_NAME,
+        'group_name': globals.GROUP_NAME,
+        'container_name': globals.RECEIVE_TOPIC,
+        'file_name': file_name,
+        'client_id': globals.CLIENT_ID
     }
     try:
         requests.request("POST", globals.DASHBOARD_URL,  data=payload)
-    except Exception as e: 
-        print(f"{e} EXCEPTION IN UPDATE STATE API CALL......FILE ID {FILE_ID}")
+    except Exception as e:
+        print(f"{e} EXCEPTION IN UPDATE STATE API CALL......")
         ERR_LOGGER(f"{e} EXCEPTION IN UPDATE STATE API CALL......FILE ID {FILE_ID}")
 
 if __name__ == "__main__":
